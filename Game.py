@@ -33,13 +33,13 @@ class State:
     ####### ゲームの勝敗と終了判定 ########
     ##################################
 
-    def done(self):
+    def is_done(self):
         return self.piece_count(self.pieces) + self.piece_count(self.enemy_pieces) == 64 or self.pass_end
 
-    def lose(self):
+    def is_lose(self):
         return self.done() and self.piece_count(self.pieces) < self.piece_count(self.enemy_pieces)
 
-    def draw(self):
+    def is_draw(self):
         return self.done() and self.piece_count(self.pieces) == self.piece_count(self.enemy_pieces)
 
     ##########################
@@ -124,7 +124,7 @@ class State:
     ######## 先手かどうか ########
     ###########################
 
-    def first_player(self):
+    def is_first_player(self):
         return self.depth%2 == 0
 
     #######################
