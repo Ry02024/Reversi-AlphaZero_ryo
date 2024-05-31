@@ -158,7 +158,7 @@ if __name__ == '__main__':
     state = State()
 
     while True:
-        if state.done():
+        if state.is_done():
             break
 
         state = state.next(random_action(state))
