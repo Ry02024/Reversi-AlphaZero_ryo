@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import argparse
 from pathlib import Path
 from ResidualNetwork import build_model
 from MonteCarloTreeSearch import MCTS
@@ -50,6 +51,10 @@ def self_play(model, num_games, log_game=False):
     return results
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Self-play settings')
+    parser.add_argument('--num_games', type=int, default=100, help='Number of self-play games to run')
+    args = parser.parse_args()
+
     model = build_model()
     try:
         model.load_weights('model/best.h5')
@@ -57,5 +62,4 @@ if __name__ == '__main__':
     except (OSError, IOError) as e:
         print("Could not load model weights from 'model/best.h5', initializing a new model with random weights.")
 
-    # 全試合結果を表示しないように設定し、最初の試合の詳細ログを表示
-    self_play(model, num_games=100, log_game=True)
+    self_play(model, num_games=args.num_games, log_game=True)
