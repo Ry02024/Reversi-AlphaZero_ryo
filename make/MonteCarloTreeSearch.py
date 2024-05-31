@@ -53,9 +53,9 @@ class MCTS:
 
     def simulate(self, state):
         while not state.is_game_over():
-            board_np = np.array(state.board)  # numpy配列に変換
-            board_np = np.expand_dims(board_np, axis=-1)  # チャンネル次元を追加
-            action_probs = self.model.predict(board_np.reshape(1, 8, 8, 1))
+            board_np = np.array(state.board)
+            board_np = np.stack((board_np == 1, board_np == -1), axis=-1).astype(np.int32)  # チャンネル次元を追加
+            action_probs = self.model.predict(board_np.reshape(1, 8, 8, 2))
             action = np.argmax(action_probs)
             state = state.next_state(action)
         return state.game_result()
