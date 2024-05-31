@@ -61,17 +61,3 @@ class MCTS:
 
     def choose_action(self, state):
         return self.search(state)
-
-if __name__ == '__main__':
-    from ResidualNetwork import build_model
-
-    model = build_model()
-    model.load_weights('model/best.h5')
-
-    mcts = MCTS(model)
-    state = State()
-
-    while not state.is_game_over():
-        action = mcts.choose_action(state)
-        state = state.next_state(action)
-        print(state)
