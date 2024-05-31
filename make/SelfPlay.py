@@ -1,4 +1,4 @@
-import numpy as np
+Cimport numpy as np
 import pickle
 import argparse
 from pathlib import Path
