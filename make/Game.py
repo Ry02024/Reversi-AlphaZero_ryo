@@ -1,6 +1,3 @@
-import random
-import math
-
 class State:
     def __init__(self):
         self.board = self.initial_board()
