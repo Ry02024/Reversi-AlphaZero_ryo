@@ -6,7 +6,7 @@ from MonteCarloTreeSearch import MCTS
 from Game import State
 import tensorflow as tf
 
-def self_play(model, num_games):
+def self_play(model, num_games, log_game=False):
     data = []
     results = {"wins": 0, "losses": 0, "draws": 0}
 
@@ -16,14 +16,15 @@ def self_play(model, num_games):
         game_data = []
         turn = 0
 
-        print(f"Starting game {game_index + 1}/{num_games}...")
+        if log_game and game_index == 0:  # 最初のゲームのみ詳細ログを表示
+            print(f"Starting game {game_index + 1}/{num_games}...")
 
         while not state.is_game_over():
             action = mcts.choose_action(state)
             game_data.append((state.board, action))
             state = state.next_state(action)
             turn += 1
-            if turn % 10 == 0:  # Display progress every 10 turns
+            if log_game and game_index == 0 and turn % 10 == 0:  # 10ターンごとにログを表示
                 print(f"Game {game_index + 1}/{num_games} - Turn {turn}")
 
         result = state.game_result()
@@ -37,7 +38,8 @@ def self_play(model, num_games):
         for board, action in game_data:
             data.append((board, action, result))
 
-        print(f"Game {game_index + 1}/{num_games} finished. Result: {result}")
+        if log_game and game_index == 0:  # 最初のゲームの結果を表示
+            print(f"Game {game_index + 1}/{num_games} finished. Result: {result}")
 
     with open('data/self_play_data.pkl', 'wb') as f:
         pickle.dump(data, f)
@@ -55,4 +57,5 @@ if __name__ == '__main__':
     except (OSError, IOError) as e:
         print("Could not load model weights from 'model/best.h5', initializing a new model with random weights.")
 
-    self_play(model, num_games=100)
+    # 全試合結果を表示しないように設定し、最初の試合の詳細ログを表示
+    self_play(model, num_games=100, log_game=True)
