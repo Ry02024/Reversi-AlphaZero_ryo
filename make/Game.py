@@ -17,19 +17,25 @@ class State:
         return actions
 
     def is_legal(self, x, y):
-        # implement legality check based on Reversi rules
+        # Implement legality check based on Reversi rules
         pass
 
     def next_state(self, action):
         new_state = State()
         new_state.board = [row[:] for row in self.board]
         new_state.player = -self.player
-        # apply the action to the board and flip the opponent's pieces
+        # Apply the action to the board and flip the opponent's pieces
         return new_state
 
     def game_result(self):
-        # returns 1 if player 1 wins, -1 if player -1 wins, 0 for draw
-        pass
+        player1_count = sum(row.count(1) for row in self.board)
+        player2_count = sum(row.count(-1) for row in self.board)
+        if player1_count > player2_count:
+            return 1
+        elif player2_count > player1_count:
+            return -1
+        else:
+            return 0
 
     def is_game_over(self):
         return not self.legal_actions()
