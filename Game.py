@@ -132,7 +132,7 @@ class State:
     #######################
 
     def __str__(self):
-        ox = ('o', 'x') if self.first_player() else ('x', 'o')
+        ox = ('o', 'x') if self.is_first_player() else ('x', 'o')
         str = ''
         for i in range(64):
             if self.pieces[i] == 1:
