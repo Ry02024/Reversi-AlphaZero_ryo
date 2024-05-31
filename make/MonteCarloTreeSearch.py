@@ -55,8 +55,13 @@ class MCTS:
         while not state.is_game_over():
             board_np = np.array(state.board)
             board_np = np.stack((board_np == 1, board_np == -1), axis=-1).astype(np.int32)  # チャンネル次元を追加
-            action_probs = self.model.predict(board_np.reshape(1, 8, 8, 2))
-            action = np.argmax(action_probs)
+            policy, value = self.model.predict(board_np.reshape(1, 8, 8, 2))
+            policy = policy[0]  # バッチ次元を削除
+            legal_actions = state.legal_actions()
+            legal_policy = np.zeros(64)
+            for action in legal_actions:
+                legal_policy[action] = policy[action]
+            action = np.argmax(legal_policy)
             state = state.next_state(action)
         return state.game_result()
 
