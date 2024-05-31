@@ -1,65 +1,69 @@
-import numpy as np
-import pickle
-import argparse
-from pathlib import Path
-from ResidualNetwork import build_model
-from MonteCarloTreeSearch import MCTS
-from Game import State
-import tensorflow as tf
+class State:
+    def __init__(self):
+        self.board = self.initial_board()
+        self.player = 1
 
-def self_play(model, num_games, log_game=False):
-    data = []
-    results = {"wins": 0, "losses": 0, "draws": 0}
+    def initial_board(self):
+        board = [[0] * 8 for _ in range(8)]
+        board[3][3], board[3][4], board[4][3], board[4][4] = 1, -1, -1, 1
+        return board
 
-    for game_index in range(num_games):
-        state = State()
-        mcts = MCTS(model)
-        game_data = []
-        turn = 0
+    def legal_actions(self):
+        actions = []
+        for x in range(8):
+            for y in range(8):
+                if self.board[x][y] == 0 and self.is_legal(x, y):
+                    actions.append((x, y))
+        return actions
 
-        if log_game and game_index == 0:  # 最初のゲームのみ詳細ログを表示
-            print(f"Starting game {game_index + 1}/{num_games}...")
+    def is_legal(self, x, y):
+        if self.board[x][y] != 0:
+            return False
+        for dx, dy in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 8 and 0 <= ny < 8 and self.board[nx][ny] == -self.player:
+                while 0 <= nx < 8 and 0 <= ny < 8:
+                    nx += dx
+                    ny += dy
+                    if not (0 <= nx < 8 and 0 <= ny < 8):
+                        break
+                    if self.board[nx][ny] == self.player:
+                        return True
+                    if self.board[nx][ny] == 0:
+                        break
+        return False
 
-        while not state.is_game_over():
-            action = mcts.choose_action(state)
-            game_data.append((state.board, action))
-            state = state.next_state(action)
-            turn += 1
-            if log_game and game_index == 0 and turn % 10 == 0:  # 10ターンごとにログを表示
-                print(f"Game {game_index + 1}/{num_games} - Turn {turn}")
+    def next_state(self, action):
+        new_state = State()
+        new_state.board = [row[:] for row in self.board]
+        new_state.player = -self.player
+        x, y = action
+        new_state.board[x][y] = self.player
+        for dx, dy in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+            nx, ny = x + dx, y + dy
+            pieces_to_flip = []
+            while 0 <= nx < 8 and 0 <= ny < 8:
+                if new_state.board[nx][ny] == -self.player:
+                    pieces_to_flip.append((nx, ny))
+                elif new_state.board[nx][ny] == self.player:
+                    for fx, fy in pieces_to_flip:
+                        new_state.board[fx][fy] = self.player
+                    break
+                else:
+                    break
+                nx += dx
+                ny += dy
+        return new_state
 
-        result = state.game_result()
-        if result == 1:
-            results["wins"] += 1
-        elif result == -1:
-            results["losses"] += 1
+    def game_result(self):
+        player1_count = sum(row.count(1) for row in self.board)
+        player2_count = sum(row.count(-1) for row in self.board)
+        if player1_count > player2_count:
+            return 1
+        elif player2_count > player1_count:
+            return -1
         else:
-            results["draws"] += 1
+            return 0
 
-        for board, action in game_data:
-            data.append((board, action, result))
-
-        if log_game and game_index == 0:  # 最初のゲームの結果を表示
-            print(f"Game {game_index + 1}/{num_games} finished. Result: {result}")
-
-    with open('data/self_play_data.pkl', 'wb') as f:
-        pickle.dump(data, f)
-
-    print("All games completed.")
-    print(f"Results: {results['wins']} Wins, {results['losses']} Losses, {results['draws']} Draws")
-
-    return results
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Self-play settings')
-    parser.add_argument('--num_games', type=int, default=100, help='Number of self-play games to run')
-    args = parser.parse_args()
-
-    model = build_model()
-    try:
-        model.load_weights('model/best.h5')
-        print("Loaded model weights from 'model/best.h5'.")
-    except (OSError, IOError) as e:
-        print("Could not load model weights from 'model/best.h5', initializing a new model with random weights.")
-
-    self_play(model, num_games=args.num_games, log_game=True)
+    def is_game_over(self):
+        return not self.legal_actions()
