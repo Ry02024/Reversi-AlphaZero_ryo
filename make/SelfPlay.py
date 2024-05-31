@@ -17,7 +17,7 @@ def self_play(model, num_games, log_game=False):
         game_data = []
         turn = 0
 
-        if log_game and game_index == 0:  # 最初のゲームのみ詳細ログを表示
+        if log_game:  # 各ゲームの開始を表示
             print(f"Starting game {game_index + 1}/{num_games}...")
 
         while not state.is_game_over():
@@ -25,7 +25,7 @@ def self_play(model, num_games, log_game=False):
             game_data.append((state.board, action))
             state = state.next_state(action)
             turn += 1
-            if log_game and game_index == 0 and turn % 10 == 0:  # 10ターンごとにログを表示
+            if log_game:  # 10ターンごとにログを表示
                 print(f"Game {game_index + 1}/{num_games} - Turn {turn}")
 
         result = state.game_result()
@@ -39,7 +39,7 @@ def self_play(model, num_games, log_game=False):
         for board, action in game_data:
             data.append((board, action, result))
 
-        if log_game and game_index == 0:  # 最初のゲームの結果を表示
+        if log_game:  # 各ゲームの結果を表示
             print(f"Game {game_index + 1}/{num_games} finished. Result: {result}")
 
     with open('data/self_play_data.pkl', 'wb') as f:
