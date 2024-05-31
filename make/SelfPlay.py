@@ -1,8 +1,10 @@
 import numpy as np
 import pickle
+from pathlib import Path
 from ResidualNetwork import build_model
 from MonteCarloTreeSearch import MCTS
 from Game import State
+import tensorflow as tf
 
 def self_play(model, num_games):
     data = []
@@ -26,5 +28,10 @@ def self_play(model, num_games):
 
 if __name__ == '__main__':
     model = build_model()
-    model.load_weights('model/best.h5')
+    try:
+        model.load_weights('model/best.h5')
+        print("Loaded model weights from 'model/best.h5'.")
+    except (OSError, IOError) as e:
+        print("Could not load model weights from 'model/best.h5', initializing a new model with random weights.")
+
     self_play(model, num_games=100)
