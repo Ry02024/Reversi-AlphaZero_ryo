@@ -54,10 +54,25 @@ class MCTS:
 
     def simulate(self, state):
         while not state.is_game_over():
-            action_probs = self.model.predict(state.board.reshape(1, 8, 8, 2))
+            board_np = np.array(state.board)  # numpy配列に変換
+            action_probs = self.model.predict(board_np.reshape(1, 8, 8, 2))
             action = np.argmax(action_probs)
             state = state.next_state(action)
         return state.game_result()
 
     def choose_action(self, state):
         return self.search(state)
+
+if __name__ == '__main__':
+    from ResidualNetwork import build_model
+
+    model = build_model()
+    model.load_weights('model/best.h5')
+
+    mcts = MCTS(model)
+    state = State()
+
+    while not state.is_game_over():
+        action = mcts.choose_action(state)
+        state = state.next_state(action)
+        print(state)
