@@ -8,6 +8,7 @@ import tensorflow as tf
 
 def self_play(model, num_games):
     data = []
+    results = {"wins": 0, "losses": 0, "draws": 0}
 
     for game_index in range(num_games):
         state = State()
@@ -26,6 +27,13 @@ def self_play(model, num_games):
                 print(f"Game {game_index + 1}/{num_games} - Turn {turn}")
 
         result = state.game_result()
+        if result == 1:
+            results["wins"] += 1
+        elif result == -1:
+            results["losses"] += 1
+        else:
+            results["draws"] += 1
+
         for board, action in game_data:
             data.append((board, action, result))
 
@@ -35,6 +43,9 @@ def self_play(model, num_games):
         pickle.dump(data, f)
 
     print("All games completed.")
+    print(f"Results: {results['wins']} Wins, {results['losses']} Losses, {results['draws']} Draws")
+
+    return results
 
 if __name__ == '__main__':
     model = build_model()
