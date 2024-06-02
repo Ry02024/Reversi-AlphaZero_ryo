@@ -151,29 +151,22 @@ if __name__ == '__main__':
             f.write("")
 
     state = State()
-
-    while True:
-        if state.is_done():
-            break
-
-        if use_model and model:
-            action = model_action(state, model)
-        else:
-            action = random_action(state)
-
-        if log_file:
-            log_game_state(state, action, log_file)
-        
+    while not state.is_done():
+        action = random_action(state)
         state = state.next(action)
-
-        print(state)
-        print()
-
-    if log_file:
-        if state.is_draw():
-            result = "Draw"
-        elif state.is_lose():
-            result = "Lose"
-        else:
-            result = "Win"
-        log_game_result(result, log_file)
+    
+    pieces_count = state.piece_count(state.pieces)
+    enemy_pieces_count = state.piece_count(state.enemy_pieces)
+    total_moves = state.depth
+    
+    if state.is_draw():
+        result = "Draw"
+    elif state.is_lose():
+        result = "Lose"
+    else:
+        result = "Win"
+    
+    print(f"Result:{result}")
+    print(f"Player 'o' pieces: {pieces_count}")
+    print(f"Player 'x' pieces: {enemy_pieces_count}")
+    print(f"Total moves: {total_moves}")
