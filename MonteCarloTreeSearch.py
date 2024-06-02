@@ -14,7 +14,7 @@ def predict(model, state):
     x = np.array([state.pieces, state.enemy_pieces])
     x = x.reshape(c, a, b).transpose(1, 2, 0).reshape(1, a, b, c)
 
-    y = model.predict(x, batch_size=1)
+    y = model.predict(x, batch_size=1, verbose=0)
 
     # 方策の取得
     policies = y[0][0][list(state.legal_actions())] # 合法手のみ
