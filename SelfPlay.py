@@ -10,7 +10,7 @@ import pickle
 import os
 
 
-SP_GAME_COUNT = 10 # セルフプレイを行うゲーム数（本家は25000）
+SP_GAME_COUNT = 1 # セルフプレイを行うゲーム数（本家は25000）
 SP_TEMPERATURE = 1.0 # ボルツマン分布の温度パラメータ
 
 def first_player_value(ended_state):
@@ -27,7 +27,7 @@ def write_data(history):
         pickle.dump(history, f)
 
 
-def play(model):
+def play(model, i):
     history = []
     state = State()
 
@@ -57,9 +57,9 @@ def play(model):
 def self_play():
     history = []
     model = load_model('./model/best.h5')
-
     for i in range(SP_GAME_COUNT):
-        h = play(model)
+        print(f"第{i+1}ゲーム開始")
+        h = play(model,i)
         history.extend(h)
 
         print('\rSelfPlay {}/{}'.format(i+1, SP_GAME_COUNT), end='')
