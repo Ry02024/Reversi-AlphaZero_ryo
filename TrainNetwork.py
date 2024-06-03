@@ -45,9 +45,9 @@ def train_network():
     training_history = model.fit(xs_train, [y_policies_train, y_values_train], batch_size=128, epochs=RN_EPOCHS,
                                  validation_data=(xs_val, [y_policies_val, y_values_val]),
                                  verbose=0, callbacks=[lr_decay, print_callback])
-    print('')
+    print('save latest model')
 
-    model.save('./model/latest.h5')
+    model.save('./model/latest.keras')
 
     K.clear_session()
     del model
@@ -56,6 +56,7 @@ def train_network():
         'loss': training_history.history['loss'],
         'val_loss': training_history.history.get('val_loss', [])
     }
+    print('save history')
     with open('./data/training_history.pkl', 'wb') as f:
         pickle.dump(history, f)
 
