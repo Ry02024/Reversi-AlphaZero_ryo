@@ -5,38 +5,14 @@ from tensorflow.keras import backend as K
 from pathlib import Path
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
-
-RN_EPOCHS = 10 # 学習回数
-
+RN_EPOCHS = 10  # 学習回数
 
 def load_data():
     history_path = sorted(Path('./data').glob('*.history'))[-1]
     with history_path.open(mode='rb') as f:
         return pickle.load(f)
-
-def plot_learning_curve(history):
-    loss = history.history['loss']
-    epochs = range(1, len(loss) + 1)
-    print(epochs)
-    print(loss)
-
-    plt.figure(figsize=(10, 6))
-    plt.plot(epochs, loss, 'bo-', label='Training loss')
-    
-    # 検証データがある場合のみ表示
-    if 'val_loss' in history.history:
-        val_loss = history.history['val_loss']
-        print(val_loss)
-        plt.plot(epochs, val_loss, 'ro-', label='Validation loss')
-
-    plt.title('Training and validation loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
 
 def train_network():
     training_data = load_data()
@@ -67,16 +43,21 @@ def train_network():
                 print('\rTrain {}/{}'.format(epoch + 1, RN_EPOCHS), end=''))
 
     training_history = model.fit(xs_train, [y_policies_train, y_values_train], batch_size=128, epochs=RN_EPOCHS,
-                        validation_data=(xs_val, [y_policies_val, y_values_val]),
-                        verbose=0, callbacks=[lr_decay, print_callback])
+                                 validation_data=(xs_val, [y_policies_val, y_values_val]),
+                                 verbose=0, callbacks=[lr_decay, print_callback])
     print('')
 
     model.save('./model/latest.h5')
 
     K.clear_session()
     del model
-    print(training_history.history)
-    plot_learning_curve(training_history)
+    
+    history = {
+        'loss': training_history.history['loss'],
+        'val_loss': training_history.history.get('val_loss', [])
+    }
+    with open('./data/training_history.pkl', 'wb') as f:
+        pickle.dump(history, f)
 
 if __name__ == '__main__':
     train_network()
