@@ -10,7 +10,7 @@ import pickle
 import os
 
 
-SP_GAME_COUNT = 1 # セルフプレイを行うゲーム数（本家は25000）
+SP_GAME_COUNT = 10 # セルフプレイを行うゲーム数（本家は25000）
 SP_TEMPERATURE = 1.0 # ボルツマン分布の温度パラメータ
 
 def first_player_value(ended_state):
