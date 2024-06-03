@@ -58,11 +58,11 @@ def self_play():
     history = []
     model = load_model('./model/best.h5')
     for i in range(SP_GAME_COUNT):
-        print(f"第{i+1}ゲーム開始")
+        print(f"第{i+1}ゲーム開始", end='')
         h = play(model,i)
         history.extend(h)
 
-        print('\rSelfPlay {}/{}'.format(i+1, SP_GAME_COUNT), end='')
+        print('\rSelfPlay {}/{}'.format(i+1, SP_GAME_COUNT))
     print('')
 
     write_data(history)
