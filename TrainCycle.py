@@ -7,7 +7,7 @@ from EvaluateNetwork import evaluate_network
 dual_network()
 
 for i in range(5):
-    print('Train',i,'====================')
+    print('Train',i+1,'====================')
     self_play()
     train_network()
     evaluate_network()
