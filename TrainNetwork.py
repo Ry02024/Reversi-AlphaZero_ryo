@@ -5,6 +5,8 @@ from tensorflow.keras import backend as K
 from pathlib import Path
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 
 RN_EPOCHS = 10 # 学習回数
@@ -15,23 +17,44 @@ def load_data():
     with history_path.open(mode='rb') as f:
         return pickle.load(f)
 
+def plot_learning_curve(history):
+    loss = history.history['loss']
+    epochs = range(1, len(loss) + 1)
+    print(epochs)
+    print(loss)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(epochs, loss, 'bo-', label='Training loss')
+    
+    # 検証データがある場合のみ表示
+    if 'val_loss' in history.history:
+        val_loss = history.history['val_loss']
+        print(val_loss)
+        plt.plot(epochs, val_loss, 'ro-', label='Validation loss')
+
+    plt.title('Training and validation loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
 
 def train_network():
-    history = load_data()
-    xs, y_policies, y_values = zip(*history)
+    training_data = load_data()
+    xs, y_policies, y_values = zip(*training_data)
 
-    # 学習のための入力データのシェイプの変換
     a, b, c = DN_INPUT_SHAPE
     xs = np.array(xs)
     xs = xs.reshape(len(xs), c, a, b).transpose(0, 2, 3, 1)
     y_policies = np.array(y_policies)
     y_values = np.array(y_values)
 
+    # データセットをトレーニングデータと検証データに分割
+    xs_train, xs_val, y_policies_train, y_policies_val, y_values_train, y_values_val = train_test_split(
+        xs, y_policies, y_values, test_size=0.2, random_state=42)
 
     model = load_model('./model/best.h5')
     model.compile(loss=['categorical_crossentropy', 'mse'], optimizer='adam')
 
-    # 学習率
     def step_decay(epoch):
         x = 0.001
         if epoch >= 50: x = 0.0005
@@ -39,19 +62,21 @@ def train_network():
         return x
     lr_decay = LearningRateScheduler(step_decay)
 
-
     print_callback = LambdaCallback(
         on_epoch_begin=lambda epoch,logs:
-                print('\rTrain {}/{}'.format(epoch + 1,RN_EPOCHS), end=''))
+                print('\rTrain {}/{}'.format(epoch + 1, RN_EPOCHS), end=''))
 
-    model.fit(xs, [y_policies, y_values], batch_size=128, epochs=RN_EPOCHS,
-            verbose=0, callbacks=[lr_decay, print_callback])
+    training_history = model.fit(xs_train, [y_policies_train, y_values_train], batch_size=128, epochs=RN_EPOCHS,
+                        validation_data=(xs_val, [y_policies_val, y_values_val]),
+                        verbose=0, callbacks=[lr_decay, print_callback])
     print('')
 
     model.save('./model/latest.h5')
 
     K.clear_session()
     del model
+    print(training_history.history)
+    plot_learning_curve(training_history)
 
 if __name__ == '__main__':
     train_network()
