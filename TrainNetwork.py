@@ -47,7 +47,7 @@ def train_network(c):
                                  verbose=0, callbacks=[lr_decay, print_callback])
     print('save latest model')
 
-    model.save('./model/latest.keras')
+    model.save('./model/latest.h5')
 
     K.clear_session()
     del model
