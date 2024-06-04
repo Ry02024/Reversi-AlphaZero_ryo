@@ -9,5 +9,5 @@ dual_network()
 for i in range(5):
     print('Train',i+1,'====================')
     self_play()
-    train_network()
+    train_network(c=i+1)
     evaluate_network()
