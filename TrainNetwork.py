@@ -14,7 +14,7 @@ def load_data():
     with history_path.open(mode='rb') as f:
         return pickle.load(f)
 
-def train_network():
+def train_network(c):
     training_data = load_data()
     xs, y_policies, y_values = zip(*training_data)
 
@@ -57,7 +57,7 @@ def train_network():
         'val_loss': training_history.history.get('val_loss', [])
     }
     print('save history')
-    with open('./data/training_history.pkl', 'wb') as f:
+    with open(f'./data/training_history{c}.pkl', 'wb') as f:
         pickle.dump(history, f)
 
 if __name__ == '__main__':
